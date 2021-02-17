@@ -8,7 +8,23 @@
 import Foundation
 
 class ToDoList: ObservableObject {
-    @Published var items = [ToDoItem(priority: "High", description: "Take out trash", dueDate: Date()),
-                            ToDoItem(priority: "Medium", description: "Pick up clothes", dueDate: Date()),
-                            ToDoItem(priority: "Low", description: "Eat a donut", dueDate: Date())]
+    @Published var items : [ToDoItem] {
+           didSet {
+               let encoder = JSONEncoder()
+               if let encoded = try? encoder.encode(items) {
+                   UserDefaults.standard.set(encoded, forKey: "data")
+               }
+           }
+       }
+    init() {
+           if let items = UserDefaults.standard.data(forKey: "data") {
+               let decoder = JSONDecoder()
+               if let decoded = try? decoder.decode([ToDoItem].self, from: items) {
+                   self.items = decoded
+                   return
+               }
+           }
+           items = []
+       }
 }
+
